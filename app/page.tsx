@@ -1,53 +1,51 @@
-import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
+import { DeployButton } from "@/components/deploy-button";
+import { EnvVarWarning } from "@/components/env-var-warning";
+import { AuthButton } from "@/components/auth-button";
+import { Hero } from "@/components/hero";
+import { ThemeSwitcher } from "@/components/theme-switcher";
+import { ConnectSupabaseSteps } from "@/components/tutorial/connect-supabase-steps";
+import { SignUpUserSteps } from "@/components/tutorial/sign-up-user-steps";
+import { hasEnvVars } from "@/lib/utils";
+import Link from "next/link";
 
-export default async function Page() {
-  try {
-    const cookieStore = await cookies()
-    const supabase = await createClient(cookieStore)
-
-    const { data: todos } = await supabase.from('todos').select()
-
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-8">
-        <h1 className="text-2xl font-bold mb-4">Todos</h1>
-        {todos && todos.length > 0 ? (
-          <ul className="space-y-2">
-            {todos.map((todo) => (
-              <li key={todo.id} className="p-2 border rounded">
-                {JSON.stringify(todo)}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-500">No todos found. Create some in your Supabase database!</p>
-        )}
-      </div>
-    )
-  } catch (error) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-8">
-        <h1 className="text-2xl font-bold mb-4 text-red-600">Configuration Required</h1>
-        <div className="max-w-md text-center space-y-4">
-          <p className="text-gray-600">
-            To use this app, you need to configure your Supabase credentials.
-          </p>
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <h2 className="font-semibold text-yellow-800 mb-2">Setup Instructions:</h2>
-            <ol className="text-left text-sm text-yellow-700 space-y-1">
-              <li>1. Go to <a href="https://app.supabase.com" target="_blank" rel="noopener noreferrer" className="underline">app.supabase.com</a></li>
-              <li>2. Create a new project or select existing one</li>
-              <li>3. Go to Settings → API</li>
-              <li>4. Copy your Project URL and anon key</li>
-              <li>5. Update your .env.local file with these values</li>
-              <li>6. Restart the development server</li>
-            </ol>
+export default function Home() {
+  return (
+    <main className="min-h-screen flex flex-col items-center">
+      <div className="flex-1 w-full flex flex-col gap-20 items-center">
+        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
+          <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
+            <div className="flex gap-5 items-center font-semibold">
+              <Link href={"/"}>Next.js Supabase Starter</Link>
+              <div className="flex items-center gap-2">
+                <DeployButton />
+              </div>
+            </div>
+            {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
           </div>
-          <p className="text-sm text-gray-500">
-            Error: {error instanceof Error ? error.message : 'Unknown error'}
-          </p>
+        </nav>
+        <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
+          <Hero />
+          <main className="flex-1 flex flex-col gap-6 px-4">
+            <h2 className="font-medium text-xl mb-4">Next steps</h2>
+            {hasEnvVars ? <SignUpUserSteps /> : <ConnectSupabaseSteps />}
+          </main>
         </div>
+
+        <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
+          <p>
+            Powered by{" "}
+            <a
+              href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
+              target="_blank"
+              className="font-bold hover:underline"
+              rel="noreferrer noopener"
+            >
+              Supabase
+            </a>
+          </p>
+          <ThemeSwitcher />
+        </footer>
       </div>
-    )
-  }
+    </main>
+  );
 }
